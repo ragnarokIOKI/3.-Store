@@ -357,3 +357,5 @@ except pyodbc.Error as err:
     print(err)
 else:
     AuthReg()
+    
+    
