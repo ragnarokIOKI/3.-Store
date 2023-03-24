@@ -57,95 +57,99 @@ def Salad(usId):
     cursor = conn.cursor()
     value = int()
     i = int(input('Введите количество блюд, которое хотите заказать: '))
-    historyrecepy = ['']
-    historycost = []
-    tarakan = int(random.randint(1, 10))
-    usertarakan = int(random.randint(1, 10))
-    if(tarakan == 5 and usertarakan == 5):
-        historyrecepy.append('Таракан. \n')
-        print('В ваше блюдо попал таракан, теперь у вас скидка 30 процентов!')
-        skidka = 1
-        value = 30
-    if (i % 5 == 0):
-        print('Вы получаете блюдо от шефа бесплатно!')
-        i = i - 1
-        historyrecepy.append('Подарочное блюдо от шефа. \n')
-        cursor.execute('SELECT Ingredient_Name FROM Ingridients')
-        for row in cursor.fetchall():
-            cursor.execute('SELECT ID_Ingredient FROM Ingridients WHERE Ingredient_Name = ?', row[0])
-            idquan = cursor.fetchone()[0]     
-            cursor.execute('UPDATE Ingridients set Quantity = Quantity - 5 where ID_Ingredient = ?', idquan)
-            cursor.commit()
-    while (i != 0):
-        historyrecepy.append('\nБлюдо №' + f'{i}' + ': ')
-        print('Введите количество ингридиентов, которое хотите добавить в салат, либо введите "0", если хотите исключить ингридиент.')
-        cursor.execute('SELECT Ingredient_Name FROM Ingridients')
-        if (cursor.fetchone() is not None):
-            for row in cursor.fetchall():                
-                    print(row[0], end=' ')
-                    saladquant = int(input())
-                    if (saladquant > 0):
-                        cursor.execute('SELECT ID_Ingredient FROM Ingridients WHERE Ingredient_Name = ?', row[0])
-                        ingid = cursor.fetchone()[0]
-                        cursor.execute('SELECT Quantity FROM Ingridients WHERE Ingredient_Name = ?', row[0])
-                        ingquant = cursor.fetchone()[0]
-                        cursor.execute('SELECT Cost FROM Ingridients WHERE Ingredient_Name = ?', row[0])
-                        ingcost = cursor.fetchone()[0]
-                        historycost.append(ingcost * saladquant)
-                        if (ingquant >= saladquant):
-                            cursor.execute('UPDATE Ingridients set Quantity = Quantity - ? where ID_Ingredient = ?', saladquant, ingid)
-                            cursor.commit()
-                            historyrecepy.append(f"{row[0]}" + f" {saladquant}" + " шт., ")
-                        elif(ingquant < saladquant):
-                            print('Данный товар отсутствует на складе в данном количестве, добавлено всё, что есть.')
-                            cursor.execute('UPDATE Ingridients set Quantity = Quantity - ? where ID_Ingredient = ?', ingquant, ingid)
-                            cursor.commit()
-                            historyrecepy.append(f"{row[0]}" + f" {saladquant}" + " шт., ")
-                    elif (saladquant == 0):
-                        historyrecepy.append(" ")
+    if (i != ''):
+        historyrecepy = ['']
+        historycost = []
+        tarakan = int(random.randint(1, 10))
+        usertarakan = int(random.randint(1, 10))
+        if(tarakan == 5 and usertarakan == 5):
+            historyrecepy.append('Таракан. \n')
+            print('В ваше блюдо попал таракан, теперь у вас скидка 30 процентов!')
+            skidka = 1
+            value = 30
+        if (i % 5 == 0):
+            print('Вы получаете блюдо от шефа бесплатно!')
             i = i - 1
-    cursor.execute('SELECT * FROM History WHERE User_ID = ?', usId)
-    cursor.execute('SELECT MAX(ID_History) FROM History')
-    max_id = cursor.fetchone()[0]
-    if max_id is None:
-        new_id = 1
+            historyrecepy.append('Подарочное блюдо от шефа. \n')
+            cursor.execute('SELECT Ingredient_Name FROM Ingridients')
+            for row in cursor.fetchall():
+                cursor.execute('SELECT ID_Ingredient FROM Ingridients WHERE Ingredient_Name = ?', row[0])
+                idquan = cursor.fetchone()[0]     
+                cursor.execute('UPDATE Ingridients set Quantity = Quantity - 5 where ID_Ingredient = ?', idquan)
+                cursor.commit()
+        while (i != 0):
+            historyrecepy.append('\nБлюдо №' + f'{i}' + ': ')
+            print('Введите количество ингридиентов, которое хотите добавить в салат, либо введите "0", если хотите исключить ингридиент.')
+            cursor.execute('SELECT Ingredient_Name FROM Ingridients')
+            if (cursor.fetchone() is not None):
+                for row in cursor.fetchall():                
+                        print(row[0], end=' ')
+                        saladquant = int(input())
+                        if (saladquant > 0):
+                            cursor.execute('SELECT ID_Ingredient FROM Ingridients WHERE Ingredient_Name = ?', row[0])
+                            ingid = cursor.fetchone()[0]
+                            cursor.execute('SELECT Quantity FROM Ingridients WHERE Ingredient_Name = ?', row[0])
+                            ingquant = cursor.fetchone()[0]
+                            cursor.execute('SELECT Cost FROM Ingridients WHERE Ingredient_Name = ?', row[0])
+                            ingcost = cursor.fetchone()[0]
+                            historycost.append(ingcost * saladquant)
+                            if (ingquant >= saladquant):
+                                cursor.execute('UPDATE Ingridients set Quantity = Quantity - ? where ID_Ingredient = ?', saladquant, ingid)
+                                cursor.commit()
+                                historyrecepy.append(f"{row[0]}" + f" {saladquant}" + " шт., ")
+                            elif(ingquant < saladquant):
+                                print('Данный товар отсутствует на складе в данном количестве, добавлено всё, что есть.')
+                                cursor.execute('UPDATE Ingridients set Quantity = Quantity - ? where ID_Ingredient = ?', ingquant, ingid)
+                                cursor.commit()
+                                historyrecepy.append(f"{row[0]}" + f" {saladquant}" + " шт., ")
+                        elif (saladquant == 0):
+                            historyrecepy.append(" ")
+                i = i - 1
+        cursor.execute('SELECT * FROM History WHERE User_ID = ?', usId)
+        cursor.execute('SELECT MAX(ID_History) FROM History')
+        max_id = cursor.fetchone()[0]
+        if max_id is None:
+            new_id = 1
+        else:
+            new_id = max_id + 1
+        date = datetime.now()
+        rec = "".join(historyrecepy)
+        cost = sum(historycost)
+        if (cost > 1000 and cost < 2000):
+            card = 'Бронзовая карта лояльности'
+            value = value + 5
+            CardAdd(usId, card, value)
+        elif (cost > 2000 and cost < 3000):
+            card = 'Серебряная карта лояльности'
+            value = value + 10
+            CardAdd(usId, card, value)
+        elif (cost > 3000):
+            card = 'Золотая карта лояльности'
+            value = value + 15
+            CardAdd(usId, card, value)
+        if (value is not None or skidka == 1):
+            cost = cost * (1 - (value/100))
+        cursor.execute('Select User_Balance from Users where ID_User = ?', usId)
+        result = cursor.fetchone()[0]
+        if (result < cost):          
+            print('Вы не можете купить данный товар, ваш баланс: ' + f'{result}', end=' \n')
+            return
+        cursor.execute('UPDATE Users set User_Balance = User_Balance - ? where ID_User = ?', cost, usId)
+        cursor.commit()
+        cursor.execute('INSERT INTO History (ID_History, User_ID, Date, Summ, Salad) VALUES (?, ?, ?, ?, ?)', new_id, usId, date, cost, rec)
+        conn.commit()
+        out_file = open(f'{datetime.now().day} ' + f'{datetime.now().hour} ' + f'{datetime.now().minute}' +' Чек' + '.txt', 'w')
+        out_file.write('------====-----Цезарь-----====----\n')
+        out_file.write('****Горячая линия 8-800-555-35-35****\n')
+        out_file.write(f'\n{rec}\n')
+        out_file.write('_______________________________________\n')
+        out_file.write('Итоговая сумма: ' + f'{cost}' + ' руб.\n')
+        out_file.write(f'{date}\n')
+        out_file.close()
+        print('Чек заполнен.')
     else:
-        new_id = max_id + 1
-    date = datetime.now()
-    rec = "".join(historyrecepy)
-    cost = sum(historycost)
-    if (cost > 1000 and cost < 2000):
-        card = 'Бронзовая карта лояльности'
-        value = value + 5
-        CardAdd(usId, card, value)
-    elif (cost > 2000 and cost < 3000):
-        card = 'Серебряная карта лояльности'
-        value = value + 10
-        CardAdd(usId, card, value)
-    elif (cost > 3000):
-        card = 'Золотая карта лояльности'
-        value = value + 15
-        CardAdd(usId, card, value)
-    if (value is not None or skidka == 1):
-        cost = cost * (1 - (value/100))
-    cursor.execute('Select User_Balance from Users where ID_User = ?', usId)
-    result = cursor.fetchone()[0]
-    if (result < cost):          
-        print('Вы не можете купить данный товар, ваш баланс: ' + f'{result}', end=' \n')
+        print('Некорректный ввод данных.')
         return
-    cursor.execute('UPDATE Users set User_Balance = User_Balance - ? where ID_User = ?', cost, usId)
-    cursor.commit()
-    cursor.execute('INSERT INTO History (ID_History, User_ID, Date, Summ, Salad) VALUES (?, ?, ?, ?, ?)', new_id, usId, date, cost, rec)
-    conn.commit()
-    out_file = open(f'{datetime.now().day} ' + f'{datetime.now().hour} ' + f'{datetime.now().minute}' +' Чек' + '.txt', 'w')
-    out_file.write('------====-----Цезарь-----====----\n')
-    out_file.write('****Горячая линия 8-800-555-35-35****\n')
-    out_file.write(f'\n{rec}\n')
-    out_file.write('_______________________________________\n')
-    out_file.write('Итоговая сумма: ' + f'{cost}' + ' руб.\n')
-    out_file.write(f'{date}\n')
-    out_file.close()
-    print('Чек заполнен.')
 
 def User(idUs):
     i = -1
@@ -153,13 +157,29 @@ def User(idUs):
         i = i - 1
         chooseUser = int(input("Выберите операцию: \n 1. Заказать блюда \n 2. Посмотреть историю покупок \n 3. Посмотреть баланс \n 4. Посмотреть карты лояльности \n 5. Выйти из системы \n"))
         if (chooseUser == 1):
-            Salad(idUs)
+            if (idUs != ''):
+                Salad(idUs)
+            else:
+                print('Некорректный ввод данных.')
+                return
         elif (chooseUser == 2):
-            History(idUs)
+            if (idUs != ''):
+                History(idUs)
+            else:
+                print('Некорректный ввод данных.')
+                return
         elif(chooseUser == 3):
-            Balance(idUs)
+            if (idUs != ''):
+                Balance(idUs)
+            else:
+                print('Некорректный ввод данных.')
+                return
         elif (chooseUser == 4):
-            Card(idUs)
+            if (idUs != ''):
+                Card(idUs)
+            else:
+                print('Некорректный ввод данных.')
+                return
         elif (chooseUser == 5):
             i = 0
             AuthReg()
@@ -234,18 +254,34 @@ def Admin():
                 print('Название: ' + f'{row[0]}' + ' Количество: ' + f'{row[1]}' + ' Цена: ' + f'{row[2]}')
         elif (chooseAdm == 2):
             ingname1 = str(input("Введите название ингридиента: "))
-            AddQuantity(ingname1)
+            if (ingname1 != ''):
+                AddQuantity(ingname1)
+            else:
+                print('Некорректный ввод данных.')
+                return
         elif (chooseAdm == 3):
             ingname2 = str(input("Введите название ингридиента: "))
             quantity = int(input("Введите количество: "))
             price = int(input("Введите цену за штуку: "))
-            AddIngridient(ingname2,quantity,price)
+            if (ingname2 != '' or quantity != '' or price != ''):
+                AddIngridient(ingname2,quantity,price)
+            else:
+                print('Некорректный ввод данных.')
+                return
         elif (chooseAdm == 4):
             ingname3 = str(input("Введите название ингридиента: "))
-            AddPrice(ingname3)
+            if (ingname3 != ''):
+                AddPrice(ingname3)
+            else:
+                print('Некорректный ввод данных.')
+                return
         elif (chooseAdm == 5):
             usId = str(input("Введите ID пользователя: "))
-            History(usId)
+            if (usId != ''):
+                History(usId)
+            else:
+                print('Некорректный ввод данных.')
+                return
         elif (chooseAdm == 6):
             Balance('1')
         elif (chooseAdm == 7):
@@ -297,10 +333,18 @@ def AuthReg():
     action = input('Выберите действие \n 1. Регистрация \n 2. Авторизация \n ')
     if action == '1':
         phone_number = input('Введите номер телефона: ')
-        Registration(phone_number)
+        if (phone_number != ''):
+            Registration(phone_number)
+        else:
+            print('Некорректный ввод данных.')
+            return
     elif action == '2':
         phone_number = input('Введите номер телефона: ')
-        LogIn(phone_number)
+        if (phone_number != ''):
+            LogIn(phone_number)
+        else:
+            print('Некорректный ввод данных.')
+            return
 
 try:
   cursor = conn.cursor()
